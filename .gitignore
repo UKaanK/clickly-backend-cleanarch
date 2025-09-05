@@ -1,0 +1,67 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vsidx
+
+
+# Build results
+bin/
+obj/
+
+# Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# Logs
+*.log
+
+# Paket yöneticisi dosyaları
+*.nupkg
+*.snupkg
+
+# Diğer
+*.DS_Store
+*.class
+*.jar
+*.war
+
+# OS dosyaları
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Resharper
+_ReSharper*/
+*.ReSharper*
+
+# SonarQube
+.sonarqube/
+
+# Paket dosyaları
+packages/
+
+# Entity Framework migrations
+Migrations/
+
+# Docker
+**/docker-compose.override.yml
+**/docker-compose.override.yaml
+**/docker-compose.override.*
+**/.docker/
+**/.dockerignore
+
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker volumes, logs, tmp
+volumes/
+logs/
+tmp/
