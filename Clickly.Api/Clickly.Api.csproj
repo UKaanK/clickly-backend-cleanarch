@@ -8,6 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Clickly.Application\Clickly.Application.csproj" />
+    <ProjectReference Include="..\Clickly.Infrastructure\Clickly.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
