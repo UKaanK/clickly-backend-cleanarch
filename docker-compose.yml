@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # Backend uygulamamız
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clickly_backend
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=urlshortener;Username=user;Password=password
+      - Serilog__WriteTo__1__Args__nodeUris=http://elasticsearch:9200
+    depends_on:
+      - db
+      - elasticsearch
+    networks:
+      - clickly-network
+
+  # PostgreSQL veritabanı
+  db:
+    image: postgres:17-alpine
+    container_name: clickly_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=urlshortener
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - clickly-network
+
+  # Elasticsearch: Loglama ve analitik veritabanı
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.1.3
+    container_name: clickly_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=clicklypass
+      - ELASTIC_USERNAME=elastic
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - clickly-network
+
+  # Kibana: Elasticsearch verilerini görselleştirme aracı
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.1.3
+    container_name: clickly_kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=GLb_o6z7*c8B43lcV*cL
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - clickly-network
+
+  # Grafana: Monitoring ve dashboard aracı
+  grafana:
+    image: grafana/grafana:11.5
+    container_name: clickly_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - db
+    networks:
+      - clickly-network
+
+  # Zabbix Server: Sistem izleme aracı
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql:7.2.12-alpine
+    container_name: clickly_zabbix_server
+    ports:
+      - "10051:10051"
+    environment:
+      - DB_SERVER_HOST=db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=urlshortener
+    depends_on:
+      - db
+    networks:
+      - clickly-network
+
+networks:
+  clickly-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  elasticsearch-data:
+  grafana-data:

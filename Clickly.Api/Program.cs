@@ -1,5 +1,7 @@
+using Clickly.Infrastructure.Persistence;
 using Clickly.Infrastructure.ServiceRegistration;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,8 @@ builder.Services.AddInfrastructureService(builder.Configuration);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,8 +28,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapOpenApi();
 }
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 
@@ -42,4 +49,10 @@ app.MapGet("/{shortCode}", async (string shortCode, IMediator mediator) =>
 });
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 app.Run();

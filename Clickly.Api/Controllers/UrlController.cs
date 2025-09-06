@@ -2,6 +2,7 @@
 using Clickly.Application.Features.ShortenUrl;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace Clickly.Api.Controllers
 {
@@ -23,10 +24,23 @@ namespace Clickly.Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("stats/{shortCode}")]
         public async Task<IActionResult> GetStats(string shortCode)
         {
             var response = await _mediator.Send(new GetStatsQuery { ShortCode = shortCode });
             return Ok(response);
+        }
+
+        [HttpGet("{shortCode}")]
+        public async Task<IActionResult> RedirectToOriginal(string shortCode, [FromServices] AppDbContext context)
+        {
+            var url = await context.Urls
+                .FirstOrDefaultAsync(u => u.ShortCode == shortCode);
+
+            if (url == null)
+                return NotFound("Kısaltılmış URL bulunamadı.");
+
+            return Redirect(url.OriginalUrl);
         }
     }
 }
