@@ -11,7 +11,7 @@ namespace Clickly.Domain.Entities
         public int Id { get; set; }
         public int UrlId { get; set; }
         public DateTime ClickedAt { get; set; } = DateTime.UtcNow;
-        public string? IpAdress { get; set; }
+        public string? IpAddress { get; set; }
         public string? UserAgent { get; set; }
         public string? Referrer { get; set; }
         public string? Country { get; set; }
@@ -19,7 +19,7 @@ namespace Clickly.Domain.Entities
         public string? DeviceType { get; set; }
         public string? Browser { get; set; }
         public string? OperatingSystem { get; set; }
-        public string? TimeSpentSeconds { get; set; }
+        public double? TimeSpentSeconds { get; set; }
 
         public virtual Url Url { get; set; } = null;
     }
