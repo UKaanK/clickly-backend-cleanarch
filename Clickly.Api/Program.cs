@@ -5,10 +5,26 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 //API katmaný özgü servisler eklenecek
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "Clickly.Api", Version = "v1" });
+    c.AddServer(new Microsoft.OpenApi.Models.OpenApiServer { Url = "http://127.0.0.1:8080" });
+}
+    );
 
 //DÝðer katman servisleri ekleneck
 builder.Services.AddApplicationServices();
@@ -16,7 +32,6 @@ builder.Services.AddInfrastructureService(builder.Configuration);
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
 
 
 var app = builder.Build();
@@ -28,12 +43,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapOpenApi();
 }
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
 
-}
-
+app.UseCors("AllowAll");
 app.UseAuthorization();
 
 // URL kýsaltma end-point'i için yönlendirme (URL redirection)
