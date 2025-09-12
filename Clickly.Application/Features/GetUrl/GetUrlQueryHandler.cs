@@ -24,6 +24,8 @@ namespace Clickly.Application.Features.GetUrl
         }
         public async Task<string> Handle(GetUrlQuery request, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Kısa kod sorgusu başlatıldı:Kısa Kod:{ShortCode}", request.ShortCode);
+
             //1. Kısa kodla URL'yi veritabanından al
             var url = await _urlRepository.GetByShortCodeAsync(request.ShortCode);
 
@@ -33,6 +35,7 @@ namespace Clickly.Application.Features.GetUrl
                 //Özel Exception Daha Mantıklı olabilir
                 throw new KeyNotFoundException("Kısa kod bulunamadı veya etkin değil");
             }
+
 
             //2. Yeni bir tıklama kaydı oluştur
             var click = new Click

@@ -30,6 +30,7 @@ namespace Clickly.Application.Features.ShortenUrl
                 //Daha sonra özel bir hata yönetimi 
                 throw new ArgumentException("Geçersiz URL formatı.");
             }
+            _logger.LogInformation("URL kısaltma işlemi başlatıldı. Orjinal URL:{OriginalUrl}", request.OriginalUrl);
 
             //2. Benzersiz kısa kod oluştur
             string shortCode = GenerateShortCode();
@@ -47,7 +48,7 @@ namespace Clickly.Application.Features.ShortenUrl
             _logger.LogInformation("URL kısaltıldı: {OriginalUrl} -> {ShortCode}", newUrl.OriginalUrl, newUrl.ShortCode);
 
             //5. Yanıt oluştur
-            string shortUrl = $"http://localhost:5000/{newUrl.ShortCode}";
+            string shortUrl = $"http://127.0.0.1:8080/{newUrl.ShortCode}";
 
             return new ShortenUrlResponse
             {
