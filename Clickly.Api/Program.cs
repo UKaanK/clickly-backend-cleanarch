@@ -2,8 +2,12 @@ using Clickly.Infrastructure.Persistence;
 using Clickly.Infrastructure.ServiceRegistration;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Serilog yapýlandýrmasý
+builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
 
 builder.Services.AddCors(options =>
 {
@@ -60,6 +64,8 @@ app.MapGet("/{shortCode}", async (string shortCode, IMediator mediator) =>
 });
 
 app.MapControllers();
+//Serilog loglamasý
+app.UseSerilogRequestLogging();
 
 using (var scope = app.Services.CreateScope())
 {
