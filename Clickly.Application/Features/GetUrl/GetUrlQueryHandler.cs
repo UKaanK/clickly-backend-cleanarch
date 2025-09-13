@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MaxMind.GeoIP2;
 
 namespace Clickly.Application.Features.GetUrl
 {
@@ -25,6 +26,7 @@ namespace Clickly.Application.Features.GetUrl
         public async Task<string> Handle(GetUrlQuery request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("Kısa kod sorgusu başlatıldı:Kısa Kod:{ShortCode}", request.ShortCode);
+            string country = null;
 
             //1. Kısa kodla URL'yi veritabanından al
             var url = await _urlRepository.GetByShortCodeAsync(request.ShortCode);
@@ -36,6 +38,24 @@ namespace Clickly.Application.Features.GetUrl
                 throw new KeyNotFoundException("Kısa kod bulunamadı veya etkin değil");
             }
 
+            if (!string.IsNullOrEmpty(request.IpAddress))
+            {
+                try
+                {
+                    //GeoLite2 veritabanına dosya yolunu belirtin
+                    var dbPath = "/app/GeoLite2-Country.mmdb";//docker ortamı
+                    using (var reader = new DatabaseReader(dbPath))
+                    {
+                        var response = reader.Country(request.IpAddress);
+                        country = response.Country.Name??"Bilgiye Ulaşılamadı";
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    _logger.LogError(ex, "Ülke bilgisini alırken hata oluştu: {IpAddress}", request.IpAddress);
+                }
+            }
 
             //2. Yeni bir tıklama kaydı oluştur
             var click = new Click
@@ -46,8 +66,8 @@ namespace Clickly.Application.Features.GetUrl
                 Referrer = request.Referrer,
                 ClickedAt = DateTime.UtcNow,
                 Browser = request.Browser,
-                City = request.City,
-                Country = request.Country,
+                City = null,
+                Country = country,
                 DeviceType = request.DeviceType,
                 OperatingSystem = request.OperatingSystem,
                 TimeSpentSeconds = 0
