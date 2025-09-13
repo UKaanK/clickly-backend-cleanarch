@@ -1,11 +1,14 @@
 using Clickly.Infrastructure.Persistence;
 using Clickly.Infrastructure.ServiceRegistration;
 using MediatR;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using UAParser;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 //Serilog yapýlandýrmasý
 builder.Host.UseSerilog((ctx, lc) => lc.ReadFrom.Configuration(ctx.Configuration));
@@ -40,6 +43,11 @@ builder.Services.AddOpenApi();
 
 
 var app = builder.Build();
+
+
+//Gerçek IP adresini almak için Forwarded Headers'ý ekle
+app.UseForwardedHeaders(new ForwardedHeadersOptions{
+    ForwardedHeaders=ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto });
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
