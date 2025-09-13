@@ -42,8 +42,17 @@ namespace Clickly.Application.Features.ShortenUrl
                 CreatedAt=DateTime.UtcNow
             };
 
+            try
+            {
+                await _urlRepository.AddAsync(newUrl);
+
+            }
+            catch (Exception)
+            {
+                _logger.LogWarning("URL veritabanına eklenemedi Veritabanını Kontrol Ediniz.");
+                throw new Exception("URL veritabanına eklenemedi.");
+            }
             //4. Url'yi veritabanına kaydet
-            await _urlRepository.AddAsync(newUrl);
 
             _logger.LogInformation("URL kısaltıldı: {OriginalUrl} -> {ShortCode}", newUrl.OriginalUrl, newUrl.ShortCode);
 

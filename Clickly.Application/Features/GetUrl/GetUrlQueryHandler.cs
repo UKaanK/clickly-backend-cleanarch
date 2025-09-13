@@ -40,13 +40,19 @@ namespace Clickly.Application.Features.GetUrl
             //2. Yeni bir tıklama kaydı oluştur
             var click = new Click
             {
-                UrlId=url.Id,
-                IpAddress=request.IpAddress,
-                UserAgent=request.UserAgent,
-                Referrer=request.Referrer,
-                ClickedAt=DateTime.UtcNow,
-                
+                UrlId = url.Id,
+                IpAddress = request.IpAddress,
+                UserAgent = request.UserAgent,
+                Referrer = request.Referrer,
+                ClickedAt = DateTime.UtcNow,
+                Browser = request.Browser,
+                City = request.City,
+                Country = request.Country,
+                DeviceType = request.DeviceType,
+                OperatingSystem = request.OperatingSystem,
+                TimeSpentSeconds = 0
             };
+
 
             //3. Tıklama kaydını veritabanına ekleyin
             await _clickRepository.AddAsync(click);
