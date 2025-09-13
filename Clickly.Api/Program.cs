@@ -3,6 +3,7 @@ using Clickly.Infrastructure.ServiceRegistration;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using UAParser;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,13 +53,36 @@ app.UseCors("AllowAll");
 app.UseAuthorization();
 
 // URL kýsaltma end-point'i için yönlendirme (URL redirection)
-app.MapGet("/{shortCode}", async (string shortCode, IMediator mediator) =>
-{
-    var originalUrl = await mediator.Send(new Clickly.Application.Features.GetUrl.GetUrlQuery
+app.MapGet("/{shortCode}", async (string shortCode, IMediator mediator,HttpContext httpContext) =>
+{// Kullanýcýya ait verileri HTTP baðlamýndan alýyoruz
+    var ipAddress = httpContext.Connection.RemoteIpAddress?.ToString();
+    var userAgentHeader = httpContext.Request.Headers["User-Agent"].ToString();
+    var referrerHeader = httpContext.Request.Headers["Referer"].ToString();
+
+    // User-Agent'i ayrýþtýrma (örnek bir yaklaþýmdýr)
+    var uaParser = Parser.GetDefault();
+    ClientInfo clientInfo = uaParser.Parse(userAgentHeader);
+
+    // Daha sonra IP adresi için GeoLite2 gibi bir servis eklenebilir.
+    // Þimdilik boþ býrakýyoruz.
+    var country = "";
+    var city = "";
+
+    var query = new Clickly.Application.Features.GetUrl.GetUrlQuery
     {
         ShortCode = shortCode,
-        // HttpContext'ten IP, User-Agent gibi bilgileri alýp buraya ekleyeceðiz
-    });
+        IpAddress = ipAddress,
+        UserAgent = userAgentHeader,
+        Referrer = referrerHeader,
+        // Ayrýþtýrýlmýþ User-Agent bilgilerini sorguya ekle
+        DeviceType = clientInfo.Device.Family,
+        Browser = clientInfo.UA.Family,
+        OperatingSystem = clientInfo.OS.Family,
+        Country = country,
+        City = city
+    };
+
+    var originalUrl = await mediator.Send(query);
 
     return Results.Redirect(originalUrl, permanent: false);
 });
